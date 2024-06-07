@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_ingresos"
+        android:icon="@drawable/ic_trending_up"
+        android:title="Ingresos" />
+    <item
+        android:id="@+id/navigation_egresos"
+        android:icon="@drawable/ic_trending_down"
+        android:title="Egresos" />
+    <item
+        android:id="@+id/navigation_resumen"
+        android:icon="@drawable/ic_monitoring"
+        android:title="Resumen" />
+    <item
+        android:id="@+id/navigation_logout"
+        android:icon="@drawable/ic_logout"
+        android:title="Cerrar sesión" />
+</menu>

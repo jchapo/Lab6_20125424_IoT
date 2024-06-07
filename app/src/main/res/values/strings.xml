@@ -4,5 +4,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <!-- res/values/strings.xml -->
     <string name="default_web_client_id" translatable="false">638401416492-p2mo0tltv3anlvn42vnu6hteecst2048.apps.googleusercontent.com.apps.googleusercontent.com</string>
+    <string name="facebook_app_id">498679029162874</string>
 
 </resources>

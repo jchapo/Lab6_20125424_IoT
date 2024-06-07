@@ -11,6 +11,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.lab6_20125424_iot.dataHolder.DataManager;
+import com.example.lab6_20125424_iot.item.ListElementEgreso;
+import com.example.lab6_20125424_iot.item.ListElementIngreso;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
@@ -24,8 +27,12 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -86,14 +93,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void startSignIn() {
-        Intent intent = AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(Arrays.asList(
-                        new AuthUI.IdpConfig.EmailBuilder().build(),
-                        new AuthUI.IdpConfig.GoogleBuilder().build()
-                ))
-                .build();
-        signInLauncher.launch(intent);
+        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+        startActivity(intent);
     }
 
     private void loginUser() {
@@ -101,7 +102,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ingrese un usuario y contraseña", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -109,6 +110,9 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            DataManager.getInstance().setUserId(user.getUid());
+                        }
                         updateUI(user);
                     } else {
                         Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
@@ -130,6 +134,9 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            DataManager.getInstance().setUserId(user.getUid());
+                        }
                         updateUI(user);
                     } else {
                         Log.w("LoginActivity", "signInWithCredential:failure", task.getException());
@@ -143,6 +150,7 @@ public class LoginActivity extends AppCompatActivity {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 Log.d("msg-test", "Firebase uid: " + user.getUid());
+                DataManager.getInstance().setUserId(user.getUid());
                 updateUI(user);
             }
         } else {
@@ -153,11 +161,72 @@ public class LoginActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser user) {
         if (user != null) {
-            Intent intent = new Intent(LoginActivity.this, Navegation.class);
-            startActivity(intent);
-            finish();
+            loadIngresosFromFirestore(() -> {
+                loadEgresosFromFirestore(() -> {
+                    Intent intent = new Intent(LoginActivity.this, Navegation.class);
+                    startActivity(intent);
+                    finish();
+                });
+            });
         } else {
-            Toast.makeText(this, "Login cancelled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Sesión cancelada", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void loadIngresosFromFirestore(Runnable onSuccess) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String uid = mAuth.getCurrentUser().getUid();
+        String path = "users/" + uid + "/ingresos";
+        db.collection(path)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<ListElementIngreso> ingresosList = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            ListElementIngreso ingreso = document.toObject(ListElementIngreso.class);
+                            ingreso.setId(document.getId());
+                            ingresosList.add(ingreso);
+                        }
+                        DataManager.getInstance().setIngresosList(ingresosList);
+
+                        // Log the elements of ingresosList
+                        for (ListElementIngreso ingreso : ingresosList) {
+                            Log.d("msg-test", "Ingreso: " + ingreso.getAmount());
+                        }
+
+                        onSuccess.run();
+                    } else {
+                        Log.d("msg-test", "Error getting ingreso documents: ", task.getException());
+                    }
+                });
+    }
+
+    private void loadEgresosFromFirestore(Runnable onSuccess) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String uid = mAuth.getCurrentUser().getUid();
+        String path = "users/" + uid + "/egresos";
+        db.collection(path)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<ListElementEgreso> egresosList = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            ListElementEgreso egreso = document.toObject(ListElementEgreso.class);
+                            egreso.setId(document.getId());
+                            egresosList.add(egreso);
+                        }
+                        DataManager.getInstance().setEgresosList(egresosList);
+
+                        // Log the elements of egresosList
+                        for (ListElementEgreso egreso : egresosList) {
+                            Log.d("msg-test", "Egreso: " + egreso.getAmount());
+                        }
+
+                        onSuccess.run();
+                    } else {
+                        Log.d("msg-test", "Error getting egreso documents: ", task.getException());
+                    }
+                });
+    }
+
 }

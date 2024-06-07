@@ -1,64 +1,57 @@
 package com.example.lab6_20125424_iot;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link EgresosFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import com.example.lab6_20125424_iot.dataHolder.DataManager;
+import com.example.lab6_20125424_iot.item.EgresosAdapter;
+import com.example.lab6_20125424_iot.item.ListElementIngreso;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
+
 public class EgresosFragment extends Fragment {
+    private EgresosAdapter egresosAdapter;
+    private RecyclerView recyclerViewUsers;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public EgresosFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment BlankFragmentEgresos.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static EgresosFragment newInstance(String param1, String param2) {
-        EgresosFragment fragment = new EgresosFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_blank_egresos, container, false);
+        initializeViews(view);
+        return view;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    public void onResume() {
+        super.onResume();
+        updateEgresosList();
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_blank_egresos, container, false);
+    private void initializeViews(View view) {
+        recyclerViewUsers = view.findViewById(R.id.recyclerViewEgresos);
+        recyclerViewUsers.setHasFixedSize(true);
+        recyclerViewUsers.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        egresosAdapter = new EgresosAdapter(DataManager.getInstance().getEgresosList());
+        recyclerViewUsers.setAdapter(egresosAdapter);
+
+        FloatingActionButton agregarUsuarioButton = view.findViewById(R.id.fabEgresos);
+        agregarUsuarioButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), NuevoIngresoEgreso.class);
+            intent.putExtra("entry_type", "egreso");
+            startActivity(intent);
+        });
+    }
+
+    private void updateEgresosList() {
+        egresosAdapter.notifyDataSetChanged();
     }
 }

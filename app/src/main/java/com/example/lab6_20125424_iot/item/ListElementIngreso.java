@@ -1,20 +1,24 @@
 package com.example.lab6_20125424_iot.item;
 
-public class ListElementIngreso {
-    private String id;
-    private String titulo;
-    private double monto;
-    private String descripcion;
-    private String fecha;
+import java.io.Serializable;
 
-    public ListElementIngreso(String id, String titulo, double monto, String descripcion, String fecha) {
+public class ListElementIngreso implements Serializable {
+    private String id;
+    private String title;
+    private double amount;
+    private String description;
+    private String date;
+
+    public ListElementIngreso(String id, String title, double amount, String description, String date) {
         this.id = id;
-        this.titulo = titulo;
-        this.monto = monto;
-        this.descripcion = descripcion;
-        this.fecha = fecha;
+        this.title = title;
+        this.amount = amount;
+        this.description = description;
+        this.date = date;
     }
 
+    // Constructor sin argumentos requerido por Firebase
+    public ListElementIngreso() {}
 
 
     public String getId() {
@@ -25,35 +29,35 @@ public class ListElementIngreso {
         this.id = id;
     }
 
-    public String getTitulo() {
-        return titulo;
+    public String getTitle() {
+        return title;
     }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public double getMonto() {
-        return monto;
+    public double getAmount() {
+        return amount;
     }
 
-    public void setMonto(double monto) {
-        this.monto = monto;
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getFecha() {
-        return fecha;
+    public String getDate() {
+        return date;
     }
 
-    public void setFecha(String fecha) {
-        this.fecha = fecha;
+    public void setDate(String date) {
+        this.date = date;
     }
 }

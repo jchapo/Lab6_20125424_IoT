@@ -30,8 +30,7 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Título"
-            android:enabled="false" />
+            android:hint="Título" />
 
         <EditText
             android:id="@+id/amount"
@@ -50,8 +49,7 @@
             android:id="@+id/date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Fecha"
-            android:enabled="false" />
+            android:hint="Fecha" />
 
         <Button
             android:id="@+id/createButton"

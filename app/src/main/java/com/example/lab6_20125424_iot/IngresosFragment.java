@@ -41,7 +41,7 @@ public class IngresosFragment extends Fragment {
         ingresosAdapter = new IngresosAdapter(DataManager.getInstance().getIngresosList(), item -> {
             Intent intent = new Intent(getActivity(), NuevoIngresoEgreso.class);
             intent.putExtra("entry_type", "ingreso");
-            intent.putExtra("item_data", item); // Asegúrate de que ListElementIngreso implemente Parcelable o Serializable
+            intent.putExtra("ListElement", item); // Asegúrate de que ListElementIngreso implemente Serializable
             startActivity(intent);
         });
         recyclerViewUsers.setAdapter(ingresosAdapter);

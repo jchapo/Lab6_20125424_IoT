@@ -173,7 +173,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void loadIngresosFromFirestore(Runnable onSuccess) {
+    public void loadIngresosFromFirestore(Runnable onSuccess) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String uid = mAuth.getCurrentUser().getUid();
         String path = "users/" + uid + "/ingresos";
@@ -201,7 +201,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    private void loadEgresosFromFirestore(Runnable onSuccess) {
+    public void loadEgresosFromFirestore(Runnable onSuccess) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String uid = mAuth.getCurrentUser().getUid();
         String path = "users/" + uid + "/egresos";

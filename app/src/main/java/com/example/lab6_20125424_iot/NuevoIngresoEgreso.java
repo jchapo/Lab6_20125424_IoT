@@ -18,8 +18,11 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class NuevoIngresoEgreso extends AppCompatActivity {
@@ -51,7 +54,6 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-
         // Configurar título dinámico basado en el intent
         entryType = getIntent().getStringExtra("entry_type");
         if ("ingreso".equals(entryType)) {
@@ -60,17 +62,23 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
             currentEgreso = (ListElementEgreso) getIntent().getSerializableExtra("ListElement");
         }
 
-        if (currentIngreso != null) {
+        if (currentIngreso != null && "ingreso".equals(entryType)) {
             configureViewForDetails(currentIngreso.getTitle(), currentIngreso.getAmount(), currentIngreso.getDescription(), currentIngreso.getDate());
+            etTitle.setEnabled(false);
+            etAmount.setEnabled(false);
+            etDescription.setEnabled(false);
+            etDate.setEnabled(false);
             btnSave.setOnClickListener(v -> updateIngreso());
-        } else if (currentEgreso != null) {
+        } else if (currentEgreso != null && "egreso".equals(entryType)) {
             configureViewForDetails(currentEgreso.getTitle(), currentEgreso.getAmount(), currentEgreso.getDescription(), currentEgreso.getDate());
+            etTitle.setEnabled(false);
+            etAmount.setEnabled(false);
+            etDescription.setEnabled(false);
+            etDate.setEnabled(false);
             btnSave.setOnClickListener(v -> updateEgreso());
         } else {
             topAppBar.setTitle("Nuevo " + entryType);
             fabEdit.setVisibility(View.GONE);
-            etTitle.setEnabled(true);
-            etDate.setEnabled(true);
             btnSave.setOnClickListener(v -> saveEntry(entryType));
         }
 
@@ -133,10 +141,12 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
                     String id = documentReference.getId();
                     if ("ingreso".equals(entryType)) {
                         ListElementIngreso newEntry = new ListElementIngreso(id, title, amount, description, date);
-                        DataManager.getInstance().addIngreso(newEntry);
+                        loadIngresosFromFirestore();
+
                     } else {
                         ListElementEgreso newEntry = new ListElementEgreso(id, title, amount, description, date);
-                        DataManager.getInstance().addEgreso(newEntry);
+                        loadEgresosFromFirestore();
+
                     }
                     Toast.makeText(NuevoIngresoEgreso.this, "Entrada guardada", Toast.LENGTH_SHORT).show();
                     finish();
@@ -167,9 +177,11 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
         entry.put("amount", amount);
         entry.put("description", description);
 
-        String collection = "users/" + DataManager.getInstance().getUserId() + "/ingresos";
+        String uid = mAuth.getCurrentUser().getUid();
+        String path = "users/" + uid + "/" + entryType + "s";
+        Log.d("msg-test", path);
 
-        db.collection(collection).document(currentIngreso.getId())
+        db.collection(path).document(currentIngreso.getId())
                 .update(entry)
                 .addOnSuccessListener(aVoid -> {
                     currentIngreso.setAmount(amount);
@@ -180,6 +192,8 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Toast.makeText(NuevoIngresoEgreso.this, "Error al actualizar ingreso", Toast.LENGTH_SHORT).show();
                 });
+        loadIngresosFromFirestore();
+
     }
 
     private void updateEgreso() {
@@ -203,9 +217,10 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
         entry.put("amount", amount);
         entry.put("description", description);
 
-        String collection = "users/" + DataManager.getInstance().getUserId() + "/egresos";
-
-        db.collection(collection).document(currentEgreso.getId())
+        String uid = mAuth.getCurrentUser().getUid();
+        String path = "users/" + uid + "/" + entryType + "s";
+        Log.d("msg-test", path);
+        db.collection(path).document(currentEgreso.getId())
                 .update(entry)
                 .addOnSuccessListener(aVoid -> {
                     currentEgreso.setAmount(amount);
@@ -215,6 +230,55 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(NuevoIngresoEgreso.this, "Error al actualizar egreso", Toast.LENGTH_SHORT).show();
+                });
+        loadEgresosFromFirestore();
+    }
+
+    private void loadEgresosFromFirestore() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String uid = mAuth.getCurrentUser().getUid();
+        String path = "users/" + uid + "/egresos";
+        db.collection(path)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<ListElementEgreso> egresosList = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            ListElementEgreso egreso = document.toObject(ListElementEgreso.class);
+                            egreso.setId(document.getId());
+                            egresosList.add(egreso);
+                        }
+                        DataManager.getInstance().setEgresosList(egresosList);
+                    } else {
+                        Log.d("msg-test", "Error getting egreso documents: ", task.getException());
+                    }
+                });
+
+    }
+
+    public void loadIngresosFromFirestore() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String uid = mAuth.getCurrentUser().getUid();
+        String path = "users/" + uid + "/ingresos";
+        db.collection(path)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<ListElementIngreso> ingresosList = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            ListElementIngreso ingreso = document.toObject(ListElementIngreso.class);
+                            ingreso.setId(document.getId());
+                            ingresosList.add(ingreso);
+                        }
+                        DataManager.getInstance().setIngresosList(ingresosList);
+
+                        // Log the elements of ingresosList
+                        for (ListElementIngreso ingreso : ingresosList) {
+                            Log.d("msg-test", "Ingreso: " + ingreso.getAmount());
+                        }
+                    } else {
+                        Log.d("msg-test", "Error getting ingreso documents: ", task.getException());
+                    }
                 });
     }
 }

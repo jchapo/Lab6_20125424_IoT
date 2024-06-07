@@ -17,9 +17,15 @@ import java.util.List;
 public class IngresosAdapter extends RecyclerView.Adapter<IngresosAdapter.IngresoViewHolder> {
 
     private List<ListElementIngreso> ingresosList;
+    private OnItemClickListener listener;
 
-    public IngresosAdapter(List<ListElementIngreso> ingresosList) {
+    public interface OnItemClickListener {
+        void onItemClick(ListElementIngreso item);
+    }
+
+    public IngresosAdapter(List<ListElementIngreso> ingresosList, OnItemClickListener listener) {
         this.ingresosList = ingresosList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -36,6 +42,8 @@ public class IngresosAdapter extends RecyclerView.Adapter<IngresosAdapter.Ingres
         holder.amount.setText(String.valueOf(ingreso.getAmount()));
         holder.description.setText(ingreso.getDescription());
         holder.date.setText(ingreso.getDate());
+
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(ingreso));
 
         holder.deleteButton.setOnClickListener(v -> {
             // Eliminar ingreso de Firebase y de la lista

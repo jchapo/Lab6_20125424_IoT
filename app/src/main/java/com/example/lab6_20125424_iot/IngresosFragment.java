@@ -16,8 +16,6 @@ import com.example.lab6_20125424_iot.item.IngresosAdapter;
 import com.example.lab6_20125424_iot.item.ListElementIngreso;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-
 public class IngresosFragment extends Fragment {
     private IngresosAdapter ingresosAdapter;
     private RecyclerView recyclerViewUsers;
@@ -40,7 +38,12 @@ public class IngresosFragment extends Fragment {
         recyclerViewUsers.setHasFixedSize(true);
         recyclerViewUsers.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        ingresosAdapter = new IngresosAdapter(DataManager.getInstance().getIngresosList());
+        ingresosAdapter = new IngresosAdapter(DataManager.getInstance().getIngresosList(), item -> {
+            Intent intent = new Intent(getActivity(), NuevoIngresoEgreso.class);
+            intent.putExtra("entry_type", "ingreso");
+            intent.putExtra("item_data", item); // Asegúrate de que ListElementIngreso implemente Parcelable o Serializable
+            startActivity(intent);
+        });
         recyclerViewUsers.setAdapter(ingresosAdapter);
 
         FloatingActionButton agregarUsuarioButton = view.findViewById(R.id.fabIngresos);

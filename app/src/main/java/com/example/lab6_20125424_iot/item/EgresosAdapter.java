@@ -10,16 +10,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.lab6_20125424_iot.R;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
+// EgresosAdapter.java
 public class EgresosAdapter extends RecyclerView.Adapter<EgresosAdapter.EgresoViewHolder> {
 
     private List<ListElementEgreso> egresosList;
+    private OnItemClickListener listener;
 
-    public EgresosAdapter(List<ListElementEgreso> egresosList) {
+    public EgresosAdapter(List<ListElementEgreso> egresosList, OnItemClickListener listener) {
         this.egresosList = egresosList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -37,9 +41,12 @@ public class EgresosAdapter extends RecyclerView.Adapter<EgresosAdapter.EgresoVi
         holder.description.setText(egreso.getDescription());
         holder.date.setText(egreso.getDate());
 
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(egreso));
+
         holder.deleteButton.setOnClickListener(v -> {
-            // Eliminar egreso de Firebase y de la lista
-            FirebaseFirestore.getInstance().collection("egresos").document(egreso.getId())
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            String path = "users/" + uid + "/" + "egresos";
+            FirebaseFirestore.getInstance().collection(path).document(egreso.getId())
                     .delete()
                     .addOnSuccessListener(aVoid -> {
                         egresosList.remove(position);
@@ -69,5 +76,9 @@ public class EgresosAdapter extends RecyclerView.Adapter<EgresosAdapter.EgresoVi
             date = itemView.findViewById(R.id.date);
             deleteButton = itemView.findViewById(R.id.deleteButton);
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(ListElementEgreso egreso);
     }
 }

@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.lab6_20125424_iot.R;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
@@ -46,8 +47,9 @@ public class IngresosAdapter extends RecyclerView.Adapter<IngresosAdapter.Ingres
         holder.itemView.setOnClickListener(v -> listener.onItemClick(ingreso));
 
         holder.deleteButton.setOnClickListener(v -> {
-            // Eliminar ingreso de Firebase y de la lista
-            FirebaseFirestore.getInstance().collection("ingresos").document(ingreso.getId())
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            String path = "users/" + uid + "/" + "ingresos";
+            FirebaseFirestore.getInstance().collection(path).document(ingreso.getId())
                     .delete()
                     .addOnSuccessListener(aVoid -> {
                         ingresosList.remove(position);

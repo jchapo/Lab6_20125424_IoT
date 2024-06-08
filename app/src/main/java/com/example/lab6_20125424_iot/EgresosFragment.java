@@ -18,6 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
+// EgresosFragment.java
 public class EgresosFragment extends Fragment {
     private EgresosAdapter egresosAdapter;
     private RecyclerView recyclerViewUsers;
@@ -40,7 +41,12 @@ public class EgresosFragment extends Fragment {
         recyclerViewUsers.setHasFixedSize(true);
         recyclerViewUsers.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        egresosAdapter = new EgresosAdapter(DataManager.getInstance().getEgresosList());
+        egresosAdapter = new EgresosAdapter(DataManager.getInstance().getEgresosList(), egreso -> {
+            Intent intent = new Intent(getActivity(), NuevoIngresoEgreso.class);
+            intent.putExtra("entry_type", "egreso");
+            intent.putExtra("ListElement", egreso);
+            startActivity(intent);
+        });
         recyclerViewUsers.setAdapter(egresosAdapter);
 
         FloatingActionButton agregarUsuarioButton = view.findViewById(R.id.fabEgresos);
@@ -55,3 +61,4 @@ public class EgresosFragment extends Fragment {
         egresosAdapter.notifyDataSetChanged();
     }
 }
+

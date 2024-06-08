@@ -15,16 +15,20 @@ import com.example.lab6_20125424_iot.dataHolder.DataManager;
 import com.example.lab6_20125424_iot.item.ListElementEgreso;
 import com.example.lab6_20125424_iot.item.ListElementIngreso;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+// NuevoIngresoEgreso.java
 public class NuevoIngresoEgreso extends AppCompatActivity {
 
     private EditText etTitle, etAmount, etDescription, etDate;
@@ -63,18 +67,10 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
         }
 
         if (currentIngreso != null && "ingreso".equals(entryType)) {
-            configureViewForDetails(currentIngreso.getTitle(), currentIngreso.getAmount(), currentIngreso.getDescription(), currentIngreso.getDate());
-            etTitle.setEnabled(false);
-            etAmount.setEnabled(false);
-            etDescription.setEnabled(false);
-            etDate.setEnabled(false);
+            configureViewForDetails(currentIngreso.getTitle(), currentIngreso.getAmount(), currentIngreso.getDescription(), currentIngreso.getDate(), "ingreso");
             btnSave.setOnClickListener(v -> updateIngreso());
         } else if (currentEgreso != null && "egreso".equals(entryType)) {
-            configureViewForDetails(currentEgreso.getTitle(), currentEgreso.getAmount(), currentEgreso.getDescription(), currentEgreso.getDate());
-            etTitle.setEnabled(false);
-            etAmount.setEnabled(false);
-            etDescription.setEnabled(false);
-            etDate.setEnabled(false);
+            configureViewForDetails(currentEgreso.getTitle(), currentEgreso.getAmount(), currentEgreso.getDescription(), currentEgreso.getDate(), "egreso");
             btnSave.setOnClickListener(v -> updateEgreso());
         } else {
             topAppBar.setTitle("Nuevo " + entryType);
@@ -83,16 +79,25 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
         }
 
         topAppBar.setNavigationOnClickListener(v -> finish());
+
+        etDate.setOnClickListener(v -> showDatePicker());
+        etDate.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                showDatePicker();
+            }
+        });
     }
 
-    private void configureViewForDetails(String title, double amount, String description, String date) {
-        topAppBar.setTitle("Detalles de " + entryType);
+    private void configureViewForDetails(String title, double amount, String description, String date, String type) {
+        topAppBar.setTitle("Detalles de " + type);
         etTitle.setText(title);
         etAmount.setText(String.valueOf(amount));
         etDescription.setText(description);
         etDate.setText(date);
 
         etTitle.setEnabled(false);
+        etAmount.setEnabled(false);
+        etDescription.setEnabled(false);
         etDate.setEnabled(false);
         btnSave.setText("Actualizar");
         btnSave.setVisibility(View.INVISIBLE);
@@ -103,8 +108,24 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
             etDescription.setEnabled(true);
             btnSave.setVisibility(View.VISIBLE);
             fabEdit.setVisibility(View.GONE); // Ocultar el botón fabEdit
+            topAppBar.setTitle("Editar " + type);
+        });
+
+
+    }
+
+    private void showDatePicker() {
+        MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
+        builder.setTitleText("Selecciona una fecha");
+        final MaterialDatePicker<Long> picker = builder.build();
+        picker.show(getSupportFragmentManager(), picker.toString());
+
+        picker.addOnPositiveButtonClickListener(selection -> {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            etDate.setText(sdf.format(selection));
         });
     }
+
 
     private void saveEntry(String entryType) {
         String title = etTitle.getText().toString().trim();
@@ -112,7 +133,7 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
         String description = etDescription.getText().toString().trim();
         String date = etDate.getText().toString().trim();
 
-        if (TextUtils.isEmpty(title) || TextUtils.isEmpty(amountString) || TextUtils.isEmpty(description) || TextUtils.isEmpty(date)) {
+        if (TextUtils.isEmpty(title) || TextUtils.isEmpty(amountString) || TextUtils.isEmpty(date)) {
             Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -282,3 +303,4 @@ public class NuevoIngresoEgreso extends AppCompatActivity {
                 });
     }
 }
+

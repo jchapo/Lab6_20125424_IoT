@@ -67,4 +67,15 @@
         app:iconGravity="textStart"
         app:iconPadding="8dp" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/facebookSignInButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Inicio con Facebook"
+        android:layout_marginTop="16dp"
+        app:icon="@drawable/fblogo"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp" />
+
+
 </com.google.android.material.textfield.TextInputLayout>

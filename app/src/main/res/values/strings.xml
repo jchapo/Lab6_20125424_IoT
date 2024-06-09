@@ -4,6 +4,11 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <!-- res/values/strings.xml -->
     <string name="default_web_client_id" translatable="false">638401416492-p2mo0tltv3anlvn42vnu6hteecst2048.apps.googleusercontent.com.apps.googleusercontent.com</string>
-    <string name="facebook_app_id">498679029162874</string>
+
+    <string name="facebook_app_id">488291863643979</string>
+    <string name="fb_login_protocol_scheme">fb488291863643979</string>
+    <string name="facebook_client_token">f40723234300099dcf3e1595d9665b2e</string>
+
+
 
 </resources>
